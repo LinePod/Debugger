@@ -8,14 +8,22 @@ export class Point {
     }
 }
 
-interface Line {
-    type: 'line';
+export class Line {
+    constructor(point1: Point, point2: Point) {
+        this.point1 = point1;
+        this.point2 = point2;
+    }
+
     point1: Point;
     point2: Point;
 }
 
-interface Circle {
-    type: 'circle';
+export class Circle {
+    constructor(center: Point, radius: number) {
+        this.center = center;
+        this.radius = radius;
+    }
+
     center: Point;
     radius: number;
 }
