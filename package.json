@@ -1,0 +1,20 @@
+{
+  "name": "linespace-debugger",
+  "version": "1.0.0",
+  "description": "A debugger for the linespace system",
+  "main": "dist/bundle.js",
+  "author": "The 2016 Baudisch bachelorproject team",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^0.14.50",
+    "@types/react-dom": "^0.14.19",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1"
+  },
+  "devDependencies": {
+    "source-map-loader": "^0.1.5",
+    "ts-loader": "^1.2.2",
+    "typescript": "^2.0.10",
+    "webpack": "^1.13.3"
+  }
+}
