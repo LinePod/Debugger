@@ -13,16 +13,13 @@
  * counter clockwise (90° is along the positive y axis).
  */
 
-import { Point } from './geometry';
+import {Point} from './geometry';
 
 /**
  * Draws a polyline between a set of points, beginning at the current position.
  */
-export class DrawCommand {
-    constructor(points: Point[]) {
-        this.points = points;
-    }
-
+export interface DrawCommand {
+    type: 'DRAW';
     points: Point[];
 }
 
@@ -32,33 +29,24 @@ export class DrawCommand {
  * Each points coordinates are relative to the previous point, and the first
  * one is relative to the current position.
  */
-export class RelativeDrawCommand {
-    constructor(offsets: Point[]) {
-        this.offsets = offsets;
-    }
-
+export interface RelativeDrawCommand {
+    type: 'RELATIVE_DRAW';
     offsets: Point[];
 }
 
 /**
  * Move the plotter to an absolute position without drawing.
  */
-export class MoveCommand {
-    constructor(position: Point) {
-        this.position = position;
-    }
-
+export interface MoveCommand {
+    type: 'MOVE';
     position: Point;
 }
 
 /**
  * Move the plotter to a new position relative to the current one.
  */
-export class RelativeMoveCommand {
-    constructor(offset: Point) {
-        this.offset = offset;
-    }
-
+export interface RelativeMoveCommand {
+    type: 'RELATIVE_MOVE';
     offset: Point;
 }
 
@@ -71,15 +59,8 @@ export class RelativeMoveCommand {
  * While drawing, the radius is linearly interpolated from `startRadius` to
  * `endRadius`. This can be used, for example, to create spirals.
  */
-export class CircleCommand {
-    constructor(center: Point, startRadius: number, endRadius: number, startAngle: number, endAngle: number) {
-        this.center = center;
-        this.startRadius = startRadius;
-        this.endRadius = endRadius;
-        this.startAngle = startAngle;
-        this.endAngle = endAngle;
-    }
-
+export interface CircleCommand {
+    type: 'CIRCLE';
     center: Point;
     startRadius: number;
     endRadius: number;
@@ -95,14 +76,8 @@ export class CircleCommand {
  * can be calculated. In all other aspects, this command behaves like
  * `CircleCommand`.
  */
-export class RelativeCircleCommand {
-    constructor(startRadius: number, endRadius: number, startAngle: number, endAngle: number) {
-        this.startRadius = startRadius;
-        this.endRadius = endRadius;
-        this.startAngle = startAngle;
-        this.endAngle = endAngle;
-    }
-
+export interface RelativeCircleCommand {
+    type: 'RELATIVE_CIRCLE';
     startRadius: number;
     endRadius: number;
     startAngle: number;
@@ -113,8 +88,8 @@ export class RelativeCircleCommand {
  * Union type for all GPGL command types.
  */
 export type Command = DrawCommand | RelativeDrawCommand | MoveCommand |
-                      RelativeMoveCommand | CircleCommand |
-                      RelativeCircleCommand;
+    RelativeMoveCommand | CircleCommand |
+    RelativeCircleCommand;
 
 interface SplitCommand {
     instruction: string;
@@ -134,32 +109,44 @@ export function *readCommands(gpglCode: string): Iterable<Command> {
         const {instruction, params} = splitCommand(command);
         switch (instruction) {
             case 'D': {
-                yield new DrawCommand(convertToPoints(params));
+                yield {type: 'DRAW', points: convertToPoints(params)};
                 break;
             }
             case 'E': {
-                yield new RelativeDrawCommand(convertToPoints(params));
+                yield {type: 'RELATIVE_DRAW', offsets: convertToPoints(params)};
                 break;
             }
             case 'M': {
                 const [x, y] = params;
-                yield new MoveCommand(new Point(x, y));
+                yield {type: 'MOVE', position: new Point(x, y)};
                 break;
             }
             case 'O': {
                 const [x, y] = params;
-                yield new RelativeMoveCommand(new Point(x, y));
+                yield {type: 'RELATIVE_MOVE', offset: new Point(x, y)};
                 break;
             }
             case 'W': {
-                const [x, y, r1, r2, theta1, theta2] = params;
-                const center = new Point(x, y);
-                yield new CircleCommand(center, r1, r2, theta1, theta2);
+                const center = new Point(params[0], params[1]);
+                yield {
+                    type: 'CIRCLE',
+                    center,
+                    startRadius: params[2],
+                    endRadius: params[3],
+                    startAngle: params[4],
+                    endAngle: params[5],
+                };
                 break;
             }
             case ']': {
-                const [r1, r2, theta1, theta2] = params;
-                yield new RelativeCircleCommand(r1, r2, theta1, theta2);
+                const [startRadius, endRadius, startAngle, endAngle] = params;
+                yield {
+                    type: 'RELATIVE_CIRCLE',
+                    startRadius,
+                    endRadius,
+                    startAngle,
+                    endAngle
+                };
                 break;
             }
             default: {
@@ -173,8 +160,8 @@ export function *readCommands(gpglCode: string): Iterable<Command> {
 function splitCommand(command: string): SplitCommand {
     let instruction = command.substr(0, 1);
     let params = command.substr(1)
-                            .split(',')
-                            .map(s => Number.parseInt(s, 10));
+        .split(',')
+        .map(s => Number.parseInt(s, 10));
     return {instruction, params};
 }
 
