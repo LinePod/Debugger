@@ -68,6 +68,29 @@ export class Angle {
 }
 
 /**
+ * Batch of commands received at once.
+ */
+export class CommandBatch {
+    /**
+     * Commands in the batch.
+     */
+    readonly commands: ReadonlyArray<Command>;
+
+    /**
+     * Unique id for this batch.
+     */
+    readonly id: number;
+
+    private static nextId = 0;
+
+    constructor(commands: Array<Command>) {
+        this.commands = commands;
+        this.id = CommandBatch.nextId;
+        CommandBatch.nextId += 1;
+    }
+}
+
+/**
  * Draws a polyline between a set of points, beginning at the current position.
  */
 export interface DrawCommand {
@@ -140,8 +163,8 @@ export interface RelativeCircleCommand {
  * Union type for all GPGL command types.
  */
 export type Command = DrawCommand | RelativeDrawCommand | MoveCommand |
-    RelativeMoveCommand | CircleCommand |
-    RelativeCircleCommand;
+                      RelativeMoveCommand | CircleCommand |
+                      RelativeCircleCommand;
 
 interface SplitCommand {
     instruction: string;
@@ -152,53 +175,54 @@ interface SplitCommand {
  * Reads GPGL code from the
  * @param gpglCode
  */
-export function *readCommands(gpglCode: string): Iterable<Command> {
-    const commands = gpglCode.split('\x03');
+export function readCommandBatch(gpglCode: string): CommandBatch {
+    const textCommands = gpglCode.split('\x03');
     // If the last command is complete (i.e. terminated by a \x03), then the
     // last string is empty.
-    commands.pop();
-    for (const command of commands) {
+    textCommands.pop();
+    const commands: Array<Command> = [];
+    for (const command of textCommands) {
         const {instruction, params} = splitCommand(command);
         switch (instruction) {
             case 'D': {
-                yield {type: 'DRAW', points: convertToPoints(params)};
+                commands.push({type: 'DRAW', points: convertToPoints(params)});
                 break;
             }
             case 'E': {
-                yield {type: 'RELATIVE_DRAW', offsets: convertToPoints(params)};
+                commands.push({type: 'RELATIVE_DRAW', offsets: convertToPoints(params)});
                 break;
             }
             case 'M': {
                 const [x, y] = params;
-                yield {type: 'MOVE', position: new Vector(x, y)};
+                commands.push({type: 'MOVE', position: new Vector(x, y)});
                 break;
             }
             case 'O': {
                 const [x, y] = params;
-                yield {type: 'RELATIVE_MOVE', offset: new Vector(x, y)};
+                commands.push({type: 'RELATIVE_MOVE', offset: new Vector(x, y)});
                 break;
             }
             case 'W': {
                 const center = new Vector(params[0], params[1]);
-                yield {
+                commands.push({
                     type: 'CIRCLE',
                     center,
                     startRadius: params[2],
                     endRadius: params[3],
                     startAngle: new Angle(params[4]),
                     endAngle: new Angle(params[5]),
-                };
+                });
                 break;
             }
             case ']': {
                 const [startRadius, endRadius, startAngle, endAngle] = params;
-                yield {
+                commands.push({
                     type: 'RELATIVE_CIRCLE',
                     startRadius,
                     endRadius,
                     startAngle: new Angle(startAngle),
                     endAngle: new Angle(endAngle)
-                };
+                });
                 break;
             }
             default: {
@@ -207,6 +231,8 @@ export function *readCommands(gpglCode: string): Iterable<Command> {
             }
         }
     }
+
+    return new CommandBatch(commands);
 }
 
 function splitCommand(command: string): SplitCommand {
