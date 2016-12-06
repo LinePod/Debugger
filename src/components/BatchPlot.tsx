@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Angle, Command, Vector} from '../gpgl';
 
-export interface GPGLBatchProps {
+export interface BatchPlotProps {
     readonly commands: ReadonlyArray<Command>;
 }
 
@@ -116,7 +116,7 @@ function commandsToSVGPath(commands: ReadonlyArray<Command>): string {
 /**
  * Renders a batch of GPGL commands as an SVG path.
  */
-export function GPGLBatch(props: GPGLBatchProps) {
+export function BatchPlot(props: BatchPlotProps) {
     const data = commandsToSVGPath(props.commands);
-    return <path d={data} stroke='black' fill='none'/>;
+    return <path d={data} className='batch-plot'/>;
 }

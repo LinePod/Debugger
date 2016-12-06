@@ -1,0 +1,15 @@
+.batch-plot {
+    stroke: black;
+    fill: none;
+}
+
+.plotter-view {
+    width: 100vmin;
+    height: 100vmin;
+}
+
+.plotter-outline {
+    stroke: black;
+    stroke-width: 5;
+    fill: none;
+}
