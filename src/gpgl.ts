@@ -30,6 +30,44 @@ export class Vector {
 }
 
 /**
+ * A GPGL angle.
+ */
+export class Angle {
+    constructor(private readonly value: number) {
+    }
+
+    /**
+     * Translates the angle into radians.
+     */
+    get asRadians(): number {
+        // Classical degrees -> radians formula with an added division by 10
+        return this.value / 10 / 180 * Math.PI;
+    }
+
+    /**
+     * Unit vector corresponding to the angle (in the GPGL coordinate system).
+     */
+    get unitVector(): Vector {
+        const radians = this.asRadians;
+        return new Vector(Math.cos(radians), Math.sin(radians));
+    }
+
+    /**
+     * Opposite of the angle (rotated by 180°).
+     */
+    get opposite(): Angle {
+        return new Angle(this.value + 1800);
+    }
+
+    /**
+     * Delta from this angle to the other, in degrees.
+     */
+    degreeDelta(otherAngle: Angle): number {
+        return Math.abs(this.value - otherAngle.value) / 10;
+    }
+}
+
+/**
  * Draws a polyline between a set of points, beginning at the current position.
  */
 export interface DrawCommand {
@@ -78,8 +116,8 @@ export interface CircleCommand {
     center: Vector;
     startRadius: number;
     endRadius: number;
-    startAngle: number;
-    endAngle: number;
+    startAngle: Angle;
+    endAngle: Angle;
 }
 
 /**
@@ -94,8 +132,8 @@ export interface RelativeCircleCommand {
     type: 'RELATIVE_CIRCLE';
     startRadius: number;
     endRadius: number;
-    startAngle: number;
-    endAngle: number;
+    startAngle: Angle;
+    endAngle: Angle;
 }
 
 /**
@@ -147,8 +185,8 @@ export function *readCommands(gpglCode: string): Iterable<Command> {
                     center,
                     startRadius: params[2],
                     endRadius: params[3],
-                    startAngle: params[4],
-                    endAngle: params[5],
+                    startAngle: new Angle(params[4]),
+                    endAngle: new Angle(params[5]),
                 };
                 break;
             }
@@ -158,8 +196,8 @@ export function *readCommands(gpglCode: string): Iterable<Command> {
                     type: 'RELATIVE_CIRCLE',
                     startRadius,
                     endRadius,
-                    startAngle,
-                    endAngle
+                    startAngle: new Angle(startAngle),
+                    endAngle: new Angle(endAngle)
                 };
                 break;
             }
