@@ -1,5 +1,5 @@
 /**
- * Specifies classes for GPGL commands.
+ * Handling of GPGL commands and the GPGL coordinate system.
  *
  * GPGL coordinate system:
  *
@@ -13,14 +13,28 @@
  * counter clockwise (90° is along the positive y axis).
  */
 
-import {Point} from './geometry';
+/**
+ * 2 dimensional vector.
+ */
+export class Vector {
+    constructor(readonly x: number, readonly y: number) {
+    }
+
+    add(other: Vector): Vector {
+        return new Vector(this.x + other.x, this.y + other.y);
+    }
+
+    scale(scalar: number): Vector {
+        return new Vector(this.x * scalar, this.y * scalar);
+    }
+}
 
 /**
  * Draws a polyline between a set of points, beginning at the current position.
  */
 export interface DrawCommand {
     type: 'DRAW';
-    points: Point[];
+    points: Vector[];
 }
 
 /**
@@ -31,7 +45,7 @@ export interface DrawCommand {
  */
 export interface RelativeDrawCommand {
     type: 'RELATIVE_DRAW';
-    offsets: Point[];
+    offsets: Vector[];
 }
 
 /**
@@ -39,7 +53,7 @@ export interface RelativeDrawCommand {
  */
 export interface MoveCommand {
     type: 'MOVE';
-    position: Point;
+    position: Vector;
 }
 
 /**
@@ -47,7 +61,7 @@ export interface MoveCommand {
  */
 export interface RelativeMoveCommand {
     type: 'RELATIVE_MOVE';
-    offset: Point;
+    offset: Vector;
 }
 
 /**
@@ -61,7 +75,7 @@ export interface RelativeMoveCommand {
  */
 export interface CircleCommand {
     type: 'CIRCLE';
-    center: Point;
+    center: Vector;
     startRadius: number;
     endRadius: number;
     startAngle: number;
@@ -118,16 +132,16 @@ export function *readCommands(gpglCode: string): Iterable<Command> {
             }
             case 'M': {
                 const [x, y] = params;
-                yield {type: 'MOVE', position: new Point(x, y)};
+                yield {type: 'MOVE', position: new Vector(x, y)};
                 break;
             }
             case 'O': {
                 const [x, y] = params;
-                yield {type: 'RELATIVE_MOVE', offset: new Point(x, y)};
+                yield {type: 'RELATIVE_MOVE', offset: new Vector(x, y)};
                 break;
             }
             case 'W': {
-                const center = new Point(params[0], params[1]);
+                const center = new Vector(params[0], params[1]);
                 yield {
                     type: 'CIRCLE',
                     center,
@@ -165,10 +179,10 @@ function splitCommand(command: string): SplitCommand {
     return {instruction, params};
 }
 
-function convertToPoints(params: number[]): Point[] {
-    const points: Point[] = [];
+function convertToPoints(params: number[]): Vector[] {
+    const points: Vector[] = [];
     for (let i = 0; i < params.length; i += 2) {
-        points.push(new Point(params[i], params[i + 1]));
+        points.push(new Vector(params[i], params[i + 1]));
     }
 
     return points;
