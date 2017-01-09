@@ -1,11 +1,9 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { HelloWorld } from './components/HelloWorld';
-
-import { Point, Shape } from './shapes';
+import {Debugger} from './components/Debugger';
 
 ReactDOM.render(
-    <HelloWorld/>,
+    <Debugger/>,
     document.getElementById('react-root')
 );
