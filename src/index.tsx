@@ -4,6 +4,6 @@ import * as ReactDOM from 'react-dom';
 import {Debugger} from './components/Debugger';
 
 ReactDOM.render(
-    <Debugger/>,
+    <Debugger websocketPort={8080}/>,
     document.getElementById('react-root')
 );

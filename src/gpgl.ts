@@ -60,7 +60,7 @@ export class Angle {
     }
 
     /**
-     * Delta from this angle to the other, in degrees.
+     * Delta from this angle to another, in degrees.
      */
     degreeDelta(otherAngle: Angle): number {
         return Math.abs(this.value - otherAngle.value) / 10;
@@ -95,7 +95,7 @@ export class CommandBatch {
  */
 export interface DrawCommand {
     type: 'DRAW';
-    points: Vector[];
+    points: Array<Vector>;
 }
 
 /**
@@ -106,7 +106,7 @@ export interface DrawCommand {
  */
 export interface RelativeDrawCommand {
     type: 'RELATIVE_DRAW';
-    offsets: Vector[];
+    offsets: Array<Vector>;
 }
 
 /**
@@ -144,6 +144,19 @@ export interface CircleCommand {
 }
 
 /**
+ * Draw a cubic bezier curve.
+ *
+ * All positions are absolute.
+ */
+export interface BezierCurveCommand {
+    type: 'BEZIER_CURVE';
+    startPoint: Vector;
+    controlPoint1: Vector;
+    controlPoint2: Vector;
+    endPoint: Vector;
+}
+
+/**
  * Draws part of a circle outline beginning on the current position.
  *
  * The current position is interpreted as the point on the outline at
@@ -160,26 +173,33 @@ export interface RelativeCircleCommand {
 }
 
 /**
- * Union type for all GPGL command types.
+ * Union type over all GPGL command types.
  */
 export type Command = DrawCommand | RelativeDrawCommand | MoveCommand |
                       RelativeMoveCommand | CircleCommand |
-                      RelativeCircleCommand;
+                      RelativeCircleCommand | BezierCurveCommand;
 
-interface SplitCommand {
-    instruction: string;
-    params: number[];
+/**
+ * Result of parsing a batch of GPGL code.
+ */
+interface ParseResult {
+    /**
+     * Commands parsed from the code.
+     */
+    commands: CommandBatch;
+
+    /**
+     * Partial command code found at the end of the input code.
+     */
+    partialCommand: string;
 }
 
 /**
- * Reads GPGL code from the
- * @param gpglCode
+ * Parse GPGL commands from a batch of code.
  */
-export function readCommandBatch(gpglCode: string): CommandBatch {
+export function parseGPGLCode(gpglCode: string): ParseResult {
     const textCommands = gpglCode.split('\x03');
-    // If the last command is complete (i.e. terminated by a \x03), then the
-    // last string is empty.
-    textCommands.pop();
+    const partialCommand = textCommands.pop();
     const commands: Array<Command> = [];
     for (const command of textCommands) {
         const {instruction, params} = splitCommand(command);
@@ -189,7 +209,7 @@ export function readCommandBatch(gpglCode: string): CommandBatch {
                 break;
             }
             case 'E': {
-                commands.push({type: 'RELATIVE_DRAW', offsets: convertToPoints(params)});
+                commands.push({ type: 'RELATIVE_DRAW', offsets: convertToPoints(params) });
                 break;
             }
             case 'M': {
@@ -199,7 +219,7 @@ export function readCommandBatch(gpglCode: string): CommandBatch {
             }
             case 'O': {
                 const [x, y] = params;
-                commands.push({type: 'RELATIVE_MOVE', offset: new Vector(x, y)});
+                commands.push({ type: 'RELATIVE_MOVE', offset: new Vector(x, y) });
                 break;
             }
             case 'W': {
@@ -225,6 +245,21 @@ export function readCommandBatch(gpglCode: string): CommandBatch {
                 });
                 break;
             }
+            case 'BZ': {
+                // Ignore 'a' parameter because we don't know its effect.
+                const [startPoint,
+                       controlPoint1,
+                       controlPoint2,
+                       endPoint] = convertToPoints(params.slice(1));
+                commands.push({
+                    type: 'BEZIER_CURVE',
+                    startPoint,
+                    controlPoint1,
+                    controlPoint2,
+                    endPoint
+                });
+                break;
+            }
             default: {
                 console.warn(`Ignoring unknown command '${command}'`);
                 break;
@@ -232,19 +267,22 @@ export function readCommandBatch(gpglCode: string): CommandBatch {
         }
     }
 
-    return new CommandBatch(commands);
+    return { commands: new CommandBatch(commands), partialCommand };
 }
 
-function splitCommand(command: string): SplitCommand {
-    let instruction = command.substr(0, 1);
-    let params = command.substr(1)
+function splitCommand(command: string): { instruction: string, params: Array<number> } {
+    // Just using split(' ', 2) would throw away parts of the command if more
+    // than one space exists in it
+    const spacePos = command.indexOf(' ');
+    const instruction = command.substr(0, spacePos);
+    const params = command.substr(spacePos)
         .split(',')
         .map(s => Number.parseInt(s, 10));
     return {instruction, params};
 }
 
-function convertToPoints(params: number[]): Vector[] {
-    const points: Vector[] = [];
+function convertToPoints(params: Array<number>): Array<Vector> {
+    const points: Array<Vector> = [];
     for (let i = 0; i < params.length; i += 2) {
         points.push(new Vector(params[i], params[i + 1]));
     }

@@ -5,6 +5,10 @@ export interface BatchPlotProps {
     readonly commands: ReadonlyArray<Command>;
 }
 
+function formatSVGCommand(instruction: string, ...args: Array<number>): string {
+    return ` ${instruction} ${args.join(' ')}`;
+}
+
 /**
  * Return the point on the circle outline at the given GPGL angle.
  */
@@ -21,9 +25,17 @@ function pointOnCircleOutline(center: Vector, radius: number, angle: Angle): Vec
  * @param endAngle End angle in GPGL format.
  * @param moveToStart Whether to add a move command to the beginning of the arc.
  */
-function circleToSVGPath(center: Vector, radius: number, startAngle: Angle, endAngle: Angle, moveToStart: boolean): { path: string, endPoint: Vector } {
+function circleToSVGPath(
+    center: Vector,
+    radius: number,
+    startAngle: Angle,
+    endAngle: Angle,
+    moveToStart: boolean
+): { path: string, endPoint: Vector } {
     const startPoint = pointOnCircleOutline(center, radius, startAngle);
-    let path = moveToStart ? ` M ${startPoint.x},${startPoint.y}` : '';
+    let path = moveToStart
+        ? formatSVGCommand('M', startPoint.x, startPoint.y)
+        : '';
 
     let angleDeltaDegrees = startAngle.degreeDelta(endAngle);
     if (Math.abs(angleDeltaDegrees) >= 360) {
@@ -46,7 +58,7 @@ function circleToSVGPath(center: Vector, radius: number, startAngle: Angle, endA
     const largeArc = Math.abs(angleDeltaDegrees) > 180 ? 1 : 0;
     const endPoint = pointOnCircleOutline(center, radius, endAngle);
 
-    path += ` A ${radius},${radius},0,${largeArc},${clockwise},${endPoint.x},${endPoint.y}`;
+    path += formatSVGCommand('A', radius, radius, 0, largeArc, clockwise, endPoint.x, endPoint.y);
     return {path, endPoint};
 }
 
@@ -59,22 +71,22 @@ function commandsToSVGPath(commands: ReadonlyArray<Command>): string {
     for (const cmd of commands) {
         switch (cmd.type) {
             case 'MOVE': {
-                path += ` M ${cmd.position.x},${cmd.position.y}`;
+                path += formatSVGCommand('M', cmd.position.x, cmd.position.y);
                 position = cmd.position;
                 break;
             }
             case 'RELATIVE_MOVE': {
-                path += ` m ${cmd.offset.x},${cmd.offset.y}`;
+                path += formatSVGCommand('m', cmd.offset.x, cmd.offset.y);
                 position = position.add(cmd.offset);
                 break;
             }
             case 'DRAW': {
-                path += cmd.points.map(p => `L ${p.x},${p.y}`).join(' ');
+                path += cmd.points.map(p => formatSVGCommand('L', p.x, p.y)).join('');
                 position = cmd.points[cmd.points.length - 1];
                 break;
             }
             case 'RELATIVE_DRAW': {
-                path += cmd.offsets.map(p => `l ${p.x},${p.y}`).join(' ');
+                path += cmd.offsets.map(p => formatSVGCommand('l', p.x, p.y)).join('');
                 position = cmd.offsets.reduce((p1, p2) => p1.add(p2), position);
                 break;
             }
@@ -84,7 +96,13 @@ function commandsToSVGPath(commands: ReadonlyArray<Command>): string {
                 }
 
                 const radius = cmd.startRadius;
-                const {path: arcPath, endPoint} = circleToSVGPath(cmd.center, radius, cmd.startAngle, cmd.endAngle, true);
+                const {path: arcPath, endPoint} = circleToSVGPath(
+                    cmd.center,
+                    radius,
+                    cmd.startAngle,
+                    cmd.endAngle,
+                    true
+                );
                 path += arcPath;
                 position = endPoint;
                 break;
@@ -101,10 +119,30 @@ function commandsToSVGPath(commands: ReadonlyArray<Command>): string {
                 // the current position at the opposite angle.
                 const currentToCenter = cmd.startAngle.opposite.unitVector;
                 const center = position.add(currentToCenter.scale(radius));
-                const {path: arcPath, endPoint} = circleToSVGPath(center, radius, cmd.startAngle, cmd.endAngle, false);
+                const {path: arcPath, endPoint} = circleToSVGPath(
+                    center,
+                    radius,
+                    cmd.startAngle,
+                    cmd.endAngle,
+                    false
+                );
                 path += arcPath;
                 position = endPoint;
 
+                break;
+            }
+            case 'BEZIER_CURVE': {
+                path += formatSVGCommand('M', cmd.startPoint.x, cmd.startPoint.y);
+                path += formatSVGCommand(
+                    'C',
+                    cmd.controlPoint1.x,
+                    cmd.controlPoint1.y,
+                    cmd.controlPoint2.x,
+                    cmd.controlPoint2.y,
+                    cmd.endPoint.x,
+                    cmd.endPoint.y
+                );
+                position = cmd.endPoint;
                 break;
             }
         }
@@ -118,5 +156,5 @@ function commandsToSVGPath(commands: ReadonlyArray<Command>): string {
  */
 export function BatchPlot(props: BatchPlotProps) {
     const data = commandsToSVGPath(props.commands);
-    return <path d={data} className='batch-plot'/>;
+    return <path d={data} className="batch-plot"/>;
 }

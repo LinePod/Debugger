@@ -1,24 +1,31 @@
 import * as React from 'react';
-import {readCommandBatch, CommandBatch} from '../gpgl';
+import {parseGPGLCode, CommandBatch} from '../gpgl';
 import {PlotterView} from './PlotterView';
+
+interface DebuggerProps {
+    websocketPort: number;
+}
 
 interface DebuggerState {
     commandBatches: Array<CommandBatch>;
+    partialCommand: string;
 }
 
-export class Debugger extends React.Component<undefined, DebuggerState> {
-    constructor() {
-        super();
+export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
+    constructor(props: DebuggerProps) {
+        super(props);
         this.state = {
-            commandBatches: []
+            commandBatches: [],
+            partialCommand: ''
         };
 
-        const socket = new WebSocket('ws://localhost:8080');
+        const socket = new WebSocket(`ws://localhost:${this.props.websocketPort}`);
         socket.onmessage = (message) => {
-            const batchesCopy = this.state.commandBatches.slice();
-            batchesCopy.push(readCommandBatch(message.data));
+            const gpglCode = this.state.partialCommand + message.data;
+            const { commands, partialCommand }  = parseGPGLCode(gpglCode);
             this.setState({
-                commandBatches: batchesCopy
+                commandBatches: this.state.commandBatches.concat([commands]),
+                partialCommand
             });
         };
     }

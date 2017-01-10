@@ -49,9 +49,18 @@ export function PlotterView(props: PlotterViewProps) {
     const heightInSteps = props.paperHeight * props.stepsPerMillimeter;
     const lineThicknessInSteps = props.lineThickness * props.stepsPerMillimeter;
     const viewBox = `0 0 ${widthInSteps} ${heightInSteps}`;
-    return (<svg viewBox={viewBox} className='plotter-view'>
-        <rect x='0' y='0' width={widthInSteps} height={heightInSteps} className='plotter-outline'/>
-        <g transform='matrix(0,1,1,0,0,0)' style={{strokeWidth: lineThicknessInSteps}}>
+    return (<svg viewBox={viewBox} className="plotter-view">
+        <rect
+            x="0"
+            y="0"
+            width={widthInSteps}
+            height={heightInSteps}
+            className="plotter-outline"
+        />
+        <g
+            transform="matrix(0,1,1,0,0,0)"
+            style={{strokeWidth: lineThicknessInSteps}}
+        >
             {batches}
         </g>
     </svg>);
