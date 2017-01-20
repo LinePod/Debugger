@@ -1,19 +1,22 @@
+var path = require('path');
+var ats = require('awesome-typescript-loader');
+
 module.exports = {
     entry: './src/index.tsx',
     output: {
         filename: 'bundle.js',
-        path: __dirname + '/dist',
+        path: path.resolve('./dist'),
     },
 
     devtool: 'source-map',
 
     resolve: {
-        extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js',],
+        extensions: ['', '.ts', '.tsx', '.js',],
     },
 
     module: {
         loaders: [
-            { test: /\.tsx?$/, loader: 'ts-loader' },
+            { test: /\.tsx?$/, loader: 'awesome-typescript-loader' },
         ],
 
         preLoaders: [
@@ -25,4 +28,8 @@ module.exports = {
         react: 'React',
         'react-dom': 'ReactDOM',
     },
+
+    plugins: [
+        new ats.CheckerPlugin(),
+    ],
 }
