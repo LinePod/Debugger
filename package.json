@@ -5,13 +5,10 @@
     "main": "dist/bundle.js",
     "author": "The 2016 Baudisch bachelorproject team",
     "license": "MIT",
-    "dependencies": {
-        "@types/react": "^0.14.50",
-        "@types/react-dom": "^0.14.19",
-        "react": "^15.4.1",
-        "react-dom": "^15.4.1"
-    },
+    "dependencies": {},
     "devDependencies": {
+        "@types/react": "^15.0.1",
+        "@types/react-dom": "^0.14.20",
         "awesome-typescript-loader": "^3.0.0-beta.18",
         "babel-core": "^6.22.1",
         "babel-preset-es2015": "^6.18.0",
@@ -20,6 +17,8 @@
         "html-webpack-externals-plugin": "^2.2.1",
         "html-webpack-plugin": "^2.26.0",
         "html-webpack-template": "^6.0.0",
+        "react": "^15.4.2",
+        "react-dom": "^15.4.2",
         "source-map-loader": "^0.1.5",
         "typescript": "^2.0.10",
         "webpack": "^1.13.3",
