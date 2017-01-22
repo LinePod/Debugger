@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import './index.css';
+import 'normalize.css';
 
 import {Debugger} from './components/Debugger';
 
