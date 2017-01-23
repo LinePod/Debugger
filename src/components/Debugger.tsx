@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {parseGPGLCode, CommandBatch} from '../gpgl';
 import {PlotterView} from './PlotterView';
+import {A4_PAGE_SIZE, PageSize, Sidebar} from './Sidebar';
 
 interface DebuggerProps {
     websocketPort: number;
@@ -8,6 +9,7 @@ interface DebuggerProps {
 
 interface DebuggerState {
     commandBatches: Array<CommandBatch>;
+    pageSize: PageSize;
     partialCommand: string;
 }
 
@@ -16,7 +18,8 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
         super(props);
         this.state = {
             commandBatches: [],
-            partialCommand: ''
+            pageSize: A4_PAGE_SIZE,
+            partialCommand: '',
         };
 
         const socket = new WebSocket(`ws://localhost:${this.props.websocketPort}`);
@@ -26,16 +29,35 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
             this.setState({
                 commandBatches: this.state.commandBatches.concat([commands]),
                 partialCommand
-            });
+            } as DebuggerState);
         };
     }
 
+    onClear() {
+        this.setState({
+            commandBatches: [],
+        } as DebuggerState);
+    }
+
+    onPageSizeChanged(size: PageSize) {
+        this.setState({
+            pageSize: size,
+        } as DebuggerState);
+    }
+
     render() {
-        return <PlotterView
-            commandBatches={this.state.commandBatches}
-            paperWidth={210}
-            paperHeight={297}
-            stepsPerMillimeter={20}
-            lineThickness={1}/>;
+        const [width, height] = this.state.pageSize.size;
+        return <div>
+            <PlotterView
+                commandBatches={this.state.commandBatches}
+                paperWidth={width}
+                paperHeight={height}
+                stepsPerMillimeter={20}
+                lineThickness={1}/>
+            <Sidebar
+                onClear={() => this.onClear()}
+                onSizeChanged={size => this.onPageSizeChanged(size)}
+                pageSize={this.state.pageSize} />
+        </div>;
     }
 }
