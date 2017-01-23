@@ -4,6 +4,7 @@ var htmlTemplate = require('html-webpack-template');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './src/index.tsx',
@@ -79,5 +80,8 @@ module.exports = {
                 basedir: path.join(__dirname, 'node_modules'),
             }
         ),
+        new CopyWebpackPlugin([
+            { from: 'bridge.py' }
+        ]),
     ],
 }
