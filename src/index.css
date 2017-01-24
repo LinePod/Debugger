@@ -40,7 +40,11 @@
     margin-left: 10px;
 }
 
-.custom-size input {
+.custom-size .react-numeric-input {
+    width: 45%;
+}
+
+.react-numeric-input input {
+    width: 100%;
     text-align: right;
-    width: 25%;
 }

@@ -1,4 +1,6 @@
+/// <reference path="../react-numeric-input.d.ts"/>
 import * as React from 'react';
+import * as NumericInput from 'react-numeric-input';
 
 export class PageSize {
     /**
@@ -53,12 +55,36 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
             customHeight: height,
         });
         if (this.props.pageSize.name == null) {
-            this.props.onSizeChanged(new PageSize(width, height));
+            this.props.onSizeChanged(new PageSize(
+                this.state.customWidth || 1,
+                this.state.customHeight || 1
+            ));
         }
     }
 
+    private renderCustomSizeInputField(value: number,
+                                       onChange: (num: number) => any) {
+        return <NumericInput
+            min={1}
+            value={value}
+            format={(num: number) => `${num}mm`}
+            disabled={this.props.pageSize.name != null}
+            onChange={onChange}/>
+    }
+
     private renderCustomSizeSelector() {
-        const isCustomSize = this.props.pageSize.name == null;
+        const widthInput = this.renderCustomSizeInputField(
+            this.state.customWidth,
+            (num: number) => {
+                this.updateCustomSize(num, this.state.customHeight);
+            }
+        );
+        const heightInput = this.renderCustomSizeInputField(
+            this.state.customHeight,
+            (num: number) => {
+                this.updateCustomSize(this.state.customWidth, num);
+            }
+        );
         return <li key="custom">
             <label>
                 <input
@@ -70,36 +96,13 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
                             this.state.customHeight
                         ));
                     }}
-                    checked={isCustomSize}/>
+                    checked={this.props.pageSize.name == null}/>
                 {' Custom'}
             </label>
             <p className="custom-size">
-                <input
-                    type="number"
-                    value={this.state.customWidth}
-                    onChange={event => {
-                        if (!Number.isNaN(event.target.valueAsNumber)) {
-                            this.updateCustomSize(
-                                event.target.valueAsNumber,
-                                this.state.customHeight
-                            );
-                        }
-                    }}
-                    disabled={!isCustomSize}/>
-                {'mm x '}
-                <input
-                    type="number"
-                    value={this.state.customHeight}
-                    onChange={event => {
-                        if (!Number.isNaN(event.target.valueAsNumber)) {
-                            this.updateCustomSize(
-                                this.state.customWidth,
-                                event.target.valueAsNumber
-                            );
-                        }
-                    }}
-                    disabled={!isCustomSize}/>
-                mm
+                {widthInput}
+                {' x '}
+                {heightInput}
             </p>
         </li>;
     }
