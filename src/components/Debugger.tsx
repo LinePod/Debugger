@@ -29,20 +29,20 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
             this.setState({
                 commandBatches: this.state.commandBatches.concat([commands]),
                 partialCommand
-            } as DebuggerState);
+            });
         };
     }
 
     onClear() {
         this.setState({
             commandBatches: [],
-        } as DebuggerState);
+        });
     }
 
     onPageSizeChanged(size: PageSize) {
         this.setState({
             pageSize: size,
-        } as DebuggerState);
+        });
     }
 
     render() {
