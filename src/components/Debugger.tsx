@@ -9,6 +9,7 @@ interface DebuggerProps {
 
 interface DebuggerState {
     commandBatches: Array<CommandBatch>;
+    lineThickness: number;
     pageSize: PageSize;
     partialCommand: string;
 }
@@ -18,6 +19,7 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
         super(props);
         this.state = {
             commandBatches: [],
+            lineThickness: 1,
             pageSize: A4_PAGE_SIZE,
             partialCommand: '',
         };
@@ -45,6 +47,12 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
         });
     }
 
+    onLineThicknessChanged(thickness: number) {
+        this.setState({
+            lineThickness: thickness,
+        });
+    }
+
     render() {
         const [width, height] = this.state.pageSize.size;
         return <div>
@@ -53,9 +61,11 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
                 paperWidth={width}
                 paperHeight={height}
                 stepsPerMillimeter={20}
-                lineThickness={1}/>
+                lineThickness={this.state.lineThickness}/>
             <Sidebar
+                lineThickness={this.state.lineThickness}
                 onClear={() => this.onClear()}
+                onLineThicknessChanged={num => this.onLineThicknessChanged(num)}
                 onSizeChanged={size => this.onPageSizeChanged(size)}
                 pageSize={this.state.pageSize} />
         </div>;

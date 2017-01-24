@@ -31,7 +31,9 @@ const PAGE_SIZES = [
 
 export interface SidebarProps {
     pageSize: PageSize;
+    lineThickness: number;
     onClear: () => any;
+    onLineThicknessChanged: (thickness: number) => any;
     onSizeChanged: (size: PageSize) => any;
 }
 
@@ -124,6 +126,20 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
         return pageSizeSelectors;
     }
 
+    private renderLineThicknessInput() {
+        return <label>
+            Line thickness: <NumericInput
+                value={this.props.lineThickness}
+                min={0.1}
+                step={0.1}
+                precision={1}
+                format={(num: number) => `${num}mm`}
+                onChange={(num: number) => {
+                    this.props.onLineThicknessChanged(num);
+                }}/>
+        </label>;
+    }
+
     render() {
         return <div className="sidebar">
             <form>
@@ -134,6 +150,9 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
                         {this.renderPageSizeSelectors()}
                     </ul>
                 </fieldset>
+                <p>
+                    {this.renderLineThicknessInput()}
+                </p>
                 <p>
                     <button type="button" onClick={this.props.onClear}>
                         Clear page
