@@ -68,29 +68,6 @@ export class Angle {
 }
 
 /**
- * Batch of commands received at once.
- */
-export class CommandBatch {
-    /**
-     * Commands in the batch.
-     */
-    readonly commands: ReadonlyArray<Command>;
-
-    /**
-     * Unique id for this batch.
-     */
-    readonly id: number;
-
-    private static nextId = 0;
-
-    constructor(commands: Array<Command>) {
-        this.commands = commands;
-        this.id = CommandBatch.nextId;
-        CommandBatch.nextId += 1;
-    }
-}
-
-/**
  * Draws a polyline between a set of points, beginning at the current position.
  */
 export interface DrawCommand {
@@ -186,7 +163,7 @@ interface ParseResult {
     /**
      * Commands parsed from the code.
      */
-    commands: CommandBatch;
+    commands: Array<Command>;
 
     /**
      * Partial command code found at the end of the input code.
@@ -267,7 +244,7 @@ export function parseGPGLCode(gpglCode: string): ParseResult {
         }
     }
 
-    return { commands: new CommandBatch(commands), partialCommand };
+    return { commands: commands, partialCommand };
 }
 
 function splitCommand(command: string): { instruction: string, params: Array<number> } {

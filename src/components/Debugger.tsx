@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {parseGPGLCode, CommandBatch} from '../gpgl';
+import {parseGPGLCode, Command} from '../gpgl';
 import {PlotterView} from './PlotterView';
 import {A4_PAGE_SIZE, PageSize, Sidebar} from './Sidebar';
 
@@ -8,7 +8,7 @@ interface DebuggerProps {
 }
 
 interface DebuggerState {
-    commandBatches: Array<CommandBatch>;
+    commands: Array<Command>;
     lineThickness: number;
     pageSize: PageSize;
     partialCommand: string;
@@ -18,7 +18,7 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
     constructor(props: DebuggerProps) {
         super(props);
         this.state = {
-            commandBatches: [],
+            commands: [],
             lineThickness: 1,
             pageSize: A4_PAGE_SIZE,
             partialCommand: '',
@@ -29,7 +29,7 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
             const gpglCode = this.state.partialCommand + message.data;
             const { commands, partialCommand }  = parseGPGLCode(gpglCode);
             this.setState({
-                commandBatches: this.state.commandBatches.concat([commands]),
+                commands: this.state.commands.concat(commands),
                 partialCommand
             });
         };
@@ -37,7 +37,7 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
 
     onClear() {
         this.setState({
-            commandBatches: [],
+            commands: [],
         });
     }
 
@@ -57,7 +57,7 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
         const [width, height] = this.state.pageSize.size;
         return <div>
             <PlotterView
-                commandBatches={this.state.commandBatches}
+                commands={this.state.commands}
                 paperWidth={width}
                 paperHeight={height}
                 stepsPerMillimeter={20}
