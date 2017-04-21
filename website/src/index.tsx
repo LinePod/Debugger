@@ -6,6 +6,6 @@ import 'normalize.css';
 import {Debugger} from './components/Debugger';
 
 ReactDOM.render(
-    <Debugger websocketPort={8080}/>,
+    <Debugger websocketPort={3000}/>,
     document.getElementById('react-root')
 );

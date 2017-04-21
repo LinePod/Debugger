@@ -11,8 +11,8 @@ from typing import List, NamedTuple, Optional, Tuple, Union
 import websockets
 
 TCP_BUFFER_SIZE = 4096
-WS_PORT = 8080
-TCP_PORT = 8090
+WS_PORT = 3000
+TCP_PORT = 8081
 
 # List of non error websocket closing codes
 OK_WS_CLOSE_CODES = {
