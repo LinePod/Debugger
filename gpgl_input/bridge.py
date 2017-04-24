@@ -162,8 +162,7 @@ def main():
                                                ws_connections,
                                                tcp_connections,
                                                logger),
-        'localhost',
-        WS_PORT
+        port=WS_PORT
     ))
     loop.run_until_complete(asyncio.start_server(
         lambda reader, writer: accept_tcp_connection(reader,
