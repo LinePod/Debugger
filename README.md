@@ -18,3 +18,6 @@ It exposes several ports:
  * 8082: Receives SVGs to convert to GPGL and display.
          Must be send as a 32bit big endian integer containing the byte size of the SVG followed by the SVG itself.
  * 3000: Internal websocket server.
+
+`send-svg.py` is a helper script that can be used with any recent version of python 3.
+Call it with `./send-svg.py svg-file-path` to send an SVG to the running container.
