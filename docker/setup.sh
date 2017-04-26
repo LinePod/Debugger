@@ -1,6 +1,5 @@
 apt-get update
 
-
 ## Setup for gpgl_input bridge
 
 # Install add-apt-repository and curl
@@ -32,6 +31,15 @@ apt-get update
 apt-get install yarn
 
 # Build website
-cd website
+cd /website
 yarn install
 yarn build
+
+
+## Setup for svg-simplifier
+apt-get install -y cmake libboost-dev libeigen3-dev libxml2-dev build-essential
+cd /svg-simplifier
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make svg_converter

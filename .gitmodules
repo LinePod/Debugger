@@ -1,0 +1,3 @@
+[submodule "svg-simplifier"]
+	path = svg-simplifier
+	url = git@github.com:Felerius/linespace-svg-simplifier.git
