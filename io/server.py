@@ -109,7 +109,7 @@ async def handle_emulator_tcp_connection(connection, loop, ws_connections,
     try:
         while True:
             try:
-                svg_len_bytes = await connection.reader.readexactly(4)
+                svg_uuid = await connection.reader.readexactly(36)
             except asyncio.IncompleteReadError as e:
                 if len(e.partial) == 0:
                     logger.debug('TCP connection from {} disconnected'.format(
@@ -117,6 +117,8 @@ async def handle_emulator_tcp_connection(connection, loop, ws_connections,
                     emulator_tcp_connections.remove(connection)
                     return
                 raise
+            logger.debug('Receiving SVG with UUID ' + svg_uuid.decode('ascii'))
+            svg_len_bytes = await connection.reader.readexactly(4)
             svg_len = struct.unpack('>I', svg_len_bytes)[0]
             svg_bytes = await connection.reader.readexactly(svg_len)
             logger.debug('Converting SVG of size {}b'.format(svg_len))
