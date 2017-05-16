@@ -6,7 +6,7 @@ FROM ubuntu:17.04
 # Add and build svg simplifier
 ADD svg-simplifier /svg-simplifier
 RUN apt-get update && \
-    apt-get install -y cmake libboost-dev libeigen3-dev libxml2-dev build-essential && \
+    apt-get install -y cmake libboost-dev libeigen3-dev libxml2-dev libspdlog-dev g++ && \
     cd /svg-simplifier && \
     mkdir build && \
     cd build && \
