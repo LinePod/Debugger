@@ -55,12 +55,16 @@ def handle_ws_connection_closed(connection, e, logger):
             connection.name))
 
 
-def convert_svg(svg_bytes):
+def convert_svg(svg_bytes, logger):
     with tempfile.NamedTemporaryFile() as f:
         f.write(svg_bytes)
         f.flush()
-        return subprocess.run([SIMPLIFIER_PATH, f.name],
-                              stdout=subprocess.PIPE).stdout
+        proc = subprocess.run([SIMPLIFIER_PATH, f.name],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if proc.stderr:
+            logger.warn("Errors from converter: {}".format(
+                proc.stderr.decode('utf-8')))
+        return proc.stdout
 
 
 async def try_write_to_all(data, ws_connections, logger):
@@ -123,7 +127,7 @@ async def handle_emulator_tcp_connection(connection, loop, ws_connections,
             svg_bytes = await connection.reader.readexactly(svg_len)
             logger.debug('Converting SVG of size {}b'.format(svg_len))
             gpgl_code = await loop.run_in_executor(None, convert_svg,
-                                                   svg_bytes)
+                                                   svg_bytes, logger)
 
             logger.debug('Converted SVG to {}b GPGL'.format(len(gpgl_code)))
             logger.debug(('Forwarding converted GPGL to {} websocket '
