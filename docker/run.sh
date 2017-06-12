@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 python3 /io/server.py &
 
 cd website/dist
