@@ -1,3 +1,6 @@
-svg-simplifier/external/svgpp/svgpp/doc
-svg-simplifier/external/svgpp/svgpp/src
-svg-simplifier/external/svgpp/svgpp/third_party
+.git
+website/node_modules
+website/.awcache
+website/dist
+svg-simplifier/external/svgpp
+!svg-simplifier/external/svgpp/include
