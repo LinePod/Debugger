@@ -1,5 +1,7 @@
 FROM ubuntu:17.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # The order of the following commands is organized so that the most costly
 # steps come first, so that they can be reused from cache most often
 
