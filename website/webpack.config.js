@@ -20,25 +20,23 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['', '.ts', '.tsx', '.js',],
+        extensions: ['.ts', '.tsx', '.js',],
     },
 
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.tsx?$/,
-                loader: 'awesome-typescript-loader',
+                use: 'awesome-typescript-loader',
             },
             {
                 test: /\.css/,
-                loader: ExtractTextPlugin.extract('css-loader'),
+                use: ExtractTextPlugin.extract('css-loader'),
             },
-        ],
-
-        preLoaders: [
             {
-                test: /\.js$/,
-                loader: 'source-map-loader',
+              test: /\.js$/,
+              enforce: 'pre',
+              use: 'source-map-loader',
             },
         ],
     },
