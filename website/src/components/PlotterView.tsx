@@ -192,12 +192,30 @@ export function PlotterView(props: PlotterViewProps) {
     const lineThicknessInSteps = props.lineThickness * props.stepsPerMillimeter;
     const viewBox = `0 0 ${widthInSteps} ${heightInSteps}`;
     return (<svg viewBox={viewBox} className="plotter-view">
+        <defs>
+            <filter id="drop-shadow">
+                <feOffset in="SourceAlpha" result="alpha-offset" dx="20" dy="20" />
+                <feGaussianBlur in="alpha-offset" result="alpha-blurred" stdDeviation="10" />
+                {/*<feFlood floodColor="#555555" floodOpacity="1" result="color-filled"/>*/}
+                {/*<feComposite in="alpha-blurred" in2="color-filled" operator="in" result="shadow"/>*/}
+                <feColorMatrix
+                    in="alpha-blurred"
+                    result="alpha-more-transparency"
+                    type="matrix"
+                    values={`1 0 0 0  0
+                             0 1 0 0  0
+                             0 0 1 0  0
+                             0 0 0 .4 0`} />
+                <feBlend in="SourceGraphic" in2="alpha-more-transparency" mode="normal" />
+            </filter>
+        </defs>
         <rect
             x="0"
             y="0"
             width={widthInSteps}
             height={heightInSteps}
             className="plotter-outline"
+            filter="url(#drop-shadow)"
         />
         <path
             className="plot"
