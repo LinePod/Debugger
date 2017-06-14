@@ -108,7 +108,8 @@ export class PageSizeSelector extends React.Component<Props, State> {
                         name="pagesize"
                         onChange={() => this.props.onChange(size, this.props.reverseOrientation)}
                         checked={size === this.props.pageSize}/>
-                        {' ' + size.name}
+                        {` ${size.name} `}
+                        <small>{`(${size.size[0]}mm × ${size.size[1]}mm)`}</small>
                 </label>
             </li>;
         });
