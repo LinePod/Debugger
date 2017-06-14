@@ -21,8 +21,11 @@ export const A4_PAGE_SIZE = new PageSize(210, 297, 'A4');
 
 const PAGE_SIZES = [
     A4_PAGE_SIZE,
+    new PageSize(250, 353, 'B4'),
     new PageSize(148, 210, 'A5'),
+    new PageSize(176, 250, 'B5'),
     new PageSize(105, 148, 'A6'),
+    new PageSize(125, 176, 'B6'),
     new PageSize(216, 279, 'US Letter'),
     new PageSize(216, 356, 'US Legal'),
 ];
