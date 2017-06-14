@@ -55,13 +55,14 @@ export class Sidebar extends React.Component<SidebarProps, SidebarState> {
         this.setState({
             customWidth: width,
             customHeight: height,
+        }, () => {
+            if (this.props.pageSize.name == null) {
+                this.props.onSizeChanged(new PageSize(
+                    this.state.customWidth || 1,
+                    this.state.customHeight || 1
+                ));
+            }
         });
-        if (this.props.pageSize.name == null) {
-            this.props.onSizeChanged(new PageSize(
-                this.state.customWidth || 1,
-                this.state.customHeight || 1
-            ));
-        }
     }
 
     private renderCustomSizeInputField(value: number,
