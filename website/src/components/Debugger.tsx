@@ -1,7 +1,8 @@
 import * as React from 'react';
 import {parseGPGLCode, Command} from '../gpgl';
 import {PlotterView} from './PlotterView';
-import {A4_PAGE_SIZE, PageSize, Sidebar} from './Sidebar';
+import {Sidebar} from './Sidebar';
+import {A4_PAGE_SIZE, PageSize} from './PageSizeSelector';
 
 interface DebuggerProps {
     websocketPort: number;
@@ -12,6 +13,7 @@ interface DebuggerState {
     lineThickness: number;
     pageSize: PageSize;
     partialCommand: string;
+    reversePageOrientation: boolean;
 }
 
 export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
@@ -22,12 +24,13 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
             lineThickness: 1,
             pageSize: A4_PAGE_SIZE,
             partialCommand: '',
+            reversePageOrientation: false,
         };
 
         const socket = new WebSocket(`ws://localhost:${this.props.websocketPort}`);
         socket.onmessage = (message) => {
             const gpglCode = this.state.partialCommand + message.data;
-            const { commands, partialCommand }  = parseGPGLCode(gpglCode);
+            const {commands, partialCommand} = parseGPGLCode(gpglCode);
             this.setState({
                 commands: this.state.commands.concat(commands),
                 partialCommand
@@ -41,9 +44,10 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
         });
     }
 
-    onPageSizeChanged(size: PageSize) {
+    onPageSizeChanged(size: PageSize, reversePageOrientation: boolean) {
         this.setState({
             pageSize: size,
+            reversePageOrientation,
         });
     }
 
@@ -54,7 +58,11 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
     }
 
     render() {
-        const [width, height] = this.state.pageSize.size;
+        let [width, height] = this.state.pageSize.size;
+        if (this.state.reversePageOrientation) {
+            [width, height] = [height, width];
+        }
+
         return <div>
             <PlotterView
                 commands={this.state.commands}
@@ -66,8 +74,11 @@ export class Debugger extends React.Component<DebuggerProps, DebuggerState> {
                 lineThickness={this.state.lineThickness}
                 onClear={() => this.onClear()}
                 onLineThicknessChanged={num => this.onLineThicknessChanged(num)}
-                onSizeChanged={size => this.onPageSizeChanged(size)}
-                pageSize={this.state.pageSize} />
+                onSizeChanged={(size, reverseOrientation) => {
+                    this.onPageSizeChanged(size, reverseOrientation)
+                }}
+                pageSize={this.state.pageSize}
+                reverseOrientation={this.state.reversePageOrientation}/>
         </div>;
     }
 }
