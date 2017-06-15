@@ -1,5 +1,22 @@
 import * as React from 'react';
 import {Angle, Command, Vector} from '../gpgl';
+import {LayoutSettings} from './LayoutSettingsPanel';
+
+const SVG_DEFS = <defs>
+        <filter id="drop-shadow">
+            <feOffset in="SourceAlpha" result="alpha-offset" dx="20" dy="20"/>
+            <feGaussianBlur in="alpha-offset" result="alpha-blurred" stdDeviation="10"/>
+            <feColorMatrix
+                in="alpha-blurred"
+                result="alpha-more-transparency"
+                type="matrix"
+                values={`1 0 0 0  0
+                             0 1 0 0  0
+                             0 0 1 0  0
+                             0 0 0 .4 0`}/>
+            <feBlend in="SourceGraphic" in2="alpha-more-transparency" mode="normal"/>
+        </filter>
+    </defs>;
 
 function formatSVGCommand(instruction: string, ...args: Array<number>): string {
     return ` ${instruction} ${args.join(' ')}`;
@@ -21,13 +38,11 @@ function pointOnCircleOutline(center: Vector, radius: number, angle: Angle): Vec
  * @param endAngle End angle in GPGL format.
  * @param moveToStart Whether to add a move command to the beginning of the arc.
  */
-function circleToSVGPath(
-    center: Vector,
-    radius: number,
-    startAngle: Angle,
-    endAngle: Angle,
-    moveToStart: boolean
-): { path: string, endPoint: Vector } {
+function circleToSVGPath(center: Vector,
+                         radius: number,
+                         startAngle: Angle,
+                         endAngle: Angle,
+                         moveToStart: boolean): { path: string, endPoint: Vector } {
     const startPoint = pointOnCircleOutline(center, radius, startAngle);
     let path = moveToStart
         ? formatSVGCommand('M', startPoint.x, startPoint.y)
@@ -164,6 +179,11 @@ interface PlotterViewProps {
     readonly paperHeight: number;
 
     /**
+     * Settings for the page layout.
+     */
+    readonly layoutSettings: LayoutSettings;
+
+    /**
      * Number of plotter steps per millimeter.
      */
     readonly stepsPerMillimeter: number;
@@ -172,6 +192,35 @@ interface PlotterViewProps {
      * Thickness of the plotted lines in millimeters.
      */
     readonly lineThickness: number;
+}
+
+function generatePrintMargins(settings: LayoutSettings, stepsPerMillimeter: number,
+                              paperWidth: number, paperHeight: number) {
+    const {marginTop, marginLeft, plotWidth} = settings;
+    const printMarginOutlines = [];
+    if (marginTop > 0) {
+        const y = marginTop * stepsPerMillimeter;
+        printMarginOutlines.push(
+            <line x1={marginLeft * stepsPerMillimeter} y1={y}
+                  x2={(Math.min(marginLeft + plotWidth, paperWidth)) * stepsPerMillimeter}
+                  y2={y}/>);
+    }
+
+    if (marginLeft > 0) {
+        const x = marginLeft * stepsPerMillimeter;
+        printMarginOutlines.push(
+            <line x1={x} y1={marginTop * stepsPerMillimeter} x2={x}
+                  y2={paperHeight * stepsPerMillimeter}/>);
+    }
+
+    if (marginLeft + plotWidth < paperWidth) {
+        const x = (marginLeft + plotWidth) * stepsPerMillimeter;
+        printMarginOutlines.push(
+            <line x1={x} y1={marginTop * stepsPerMillimeter} x2={x}
+                  y2={paperHeight * stepsPerMillimeter}/>);
+    }
+
+    return printMarginOutlines;
 }
 
 /**
@@ -189,36 +238,28 @@ interface PlotterViewProps {
 export function PlotterView(props: PlotterViewProps) {
     const widthInSteps = props.paperWidth * props.stepsPerMillimeter;
     const heightInSteps = props.paperHeight * props.stepsPerMillimeter;
-    const lineThicknessInSteps = props.lineThickness * props.stepsPerMillimeter;
     const viewBox = `0 0 ${widthInSteps} ${heightInSteps}`;
+    const marginTopInSteps = props.layoutSettings.marginTop * props.stepsPerMillimeter;
+    const marginLeftInSteps = props.layoutSettings.marginLeft * props.stepsPerMillimeter;
+
+    let printMargins = generatePrintMargins(
+        props.layoutSettings, props.stepsPerMillimeter, props.paperWidth, props.paperHeight);
+
     return (<svg viewBox={viewBox} className="plotter-view">
-        <defs>
-            <filter id="drop-shadow">
-                <feOffset in="SourceAlpha" result="alpha-offset" dx="20" dy="20" />
-                <feGaussianBlur in="alpha-offset" result="alpha-blurred" stdDeviation="10" />
-                <feColorMatrix
-                    in="alpha-blurred"
-                    result="alpha-more-transparency"
-                    type="matrix"
-                    values={`1 0 0 0  0
-                             0 1 0 0  0
-                             0 0 1 0  0
-                             0 0 0 .4 0`} />
-                <feBlend in="SourceGraphic" in2="alpha-more-transparency" mode="normal" />
-            </filter>
-        </defs>
+        {SVG_DEFS}
         <rect
             x="0"
             y="0"
             width={widthInSteps}
             height={heightInSteps}
-            className="plotter-paper"
-            filter="url(#drop-shadow)"
-        />
+            className="plotter-paper" />
+        <g className="print-margins">
+            {...printMargins}
+        </g>
         <path
             className="plot"
-            transform="matrix(0,1,1,0,0,0)"
-            style={{strokeWidth: lineThicknessInSteps}}
+            transform={`matrix(0, 1, 1, 0, ${marginLeftInSteps}, ${marginTopInSteps})`}
+            style={{strokeWidth: props.lineThickness * props.stepsPerMillimeter}}
             d={commandsToSVGPath(props.commands)}
         />
     </svg>);

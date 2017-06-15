@@ -74,12 +74,12 @@ export class PageSizeSelector extends React.Component<Props, State> {
             min={1}
             value={this.state.customWidth}
             disabled={disabled}
-            onChange={(num: number) => this.updateCustomSize(num, this.state.customHeight)}/>;
+            onChange={val => this.updateCustomSize(val, this.state.customHeight)}/>;
         const heightInput = <MillimeterInputField
             min={1}
             value={this.state.customHeight}
             disabled={disabled}
-            onChange={(num: number) => this.updateCustomSize(this.state.customWidth, num)}/>;
+            onChange={val => this.updateCustomSize(this.state.customWidth, val)}/>;
         return <li key="custom">
             <label>
                 <input

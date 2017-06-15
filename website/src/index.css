@@ -19,6 +19,7 @@
     stroke: #888;
     stroke-width: 5;
     fill: white;
+    filter: url('#drop-shadow')
 }
 
 .sidebar {
@@ -44,7 +45,22 @@
     width: 45%;
 }
 
+.single-num-input .react-numeric-input {
+    width: 50%;
+}
+
+.single-num-input span {
+    margin-top: .3em;
+    display: inline-block;
+    width: 50%;
+}
+
 .react-numeric-input input {
     width: 100%;
     text-align: right;
+}
+
+.print-margins {
+    stroke: darkgrey;
+    stroke-dasharray: 10;
 }
