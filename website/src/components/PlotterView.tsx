@@ -201,7 +201,7 @@ function generatePrintMargins(settings: LayoutSettings, stepsPerMillimeter: numb
     if (marginTop > 0) {
         const y = marginTop * stepsPerMillimeter;
         printMarginOutlines.push(
-            <line x1={marginLeft * stepsPerMillimeter} y1={y}
+            <line key="print-margin-top" x1={marginLeft * stepsPerMillimeter} y1={y}
                   x2={(Math.min(marginLeft + plotWidth, paperWidth)) * stepsPerMillimeter}
                   y2={y}/>);
     }
@@ -209,14 +209,14 @@ function generatePrintMargins(settings: LayoutSettings, stepsPerMillimeter: numb
     if (marginLeft > 0) {
         const x = marginLeft * stepsPerMillimeter;
         printMarginOutlines.push(
-            <line x1={x} y1={marginTop * stepsPerMillimeter} x2={x}
+            <line key="print-margin-left" x1={x} y1={marginTop * stepsPerMillimeter} x2={x}
                   y2={paperHeight * stepsPerMillimeter}/>);
     }
 
     if (marginLeft + plotWidth < paperWidth) {
         const x = (marginLeft + plotWidth) * stepsPerMillimeter;
         printMarginOutlines.push(
-            <line x1={x} y1={marginTop * stepsPerMillimeter} x2={x}
+            <line key="print-margin-right" x1={x} y1={marginTop * stepsPerMillimeter} x2={x}
                   y2={paperHeight * stepsPerMillimeter}/>);
     }
 
