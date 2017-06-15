@@ -196,8 +196,6 @@ export function PlotterView(props: PlotterViewProps) {
             <filter id="drop-shadow">
                 <feOffset in="SourceAlpha" result="alpha-offset" dx="20" dy="20" />
                 <feGaussianBlur in="alpha-offset" result="alpha-blurred" stdDeviation="10" />
-                {/*<feFlood floodColor="#555555" floodOpacity="1" result="color-filled"/>*/}
-                {/*<feComposite in="alpha-blurred" in2="color-filled" operator="in" result="shadow"/>*/}
                 <feColorMatrix
                     in="alpha-blurred"
                     result="alpha-more-transparency"
@@ -214,7 +212,7 @@ export function PlotterView(props: PlotterViewProps) {
             y="0"
             width={widthInSteps}
             height={heightInSteps}
-            className="plotter-outline"
+            className="plotter-paper"
             filter="url(#drop-shadow)"
         />
         <path
