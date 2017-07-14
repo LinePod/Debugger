@@ -248,11 +248,9 @@ export function parseGPGLCode(gpglCode: string): ParseResult {
 }
 
 function splitCommand(command: string): { instruction: string, params: Array<number> } {
-    // Just using split(' ', 2) would throw away parts of the command if more
-    // than one space exists in it
-    const spacePos = command.indexOf(' ');
-    const instruction = command.substr(0, spacePos);
-    const params = command.substr(spacePos)
+    const instructionEndPos = ('0' <= command[2] && command[2] <= '9') ? 1 : 2;
+    const instruction = command.substr(0, instructionEndPos);
+    const params = command.substr(instructionEndPos)
         .split(',')
         .map(s => Number.parseInt(s, 10));
     return {instruction, params};
