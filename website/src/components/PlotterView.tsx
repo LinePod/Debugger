@@ -233,7 +233,7 @@ function generatePrintMargins(settings: LayoutSettings, stepsPerMillimeter: numb
  * a transformation matrix in the generated SVG to accomodate for this, so that
  * the rendering components can use the SVG coordinates system like the GPGL
  * one. One extra hack is necessary render arcs in right rotation, see the
- * comment in `BatchPlot.tsx` for more info.
+ * comment in circleToSVGPath for more info.
  */
 export function PlotterView(props: PlotterViewProps) {
     const widthInSteps = props.paperWidth * props.stepsPerMillimeter;
