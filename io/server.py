@@ -18,7 +18,7 @@ TCP_BUFFER_SIZE = 4096
 WS_PORT = 3000
 PI_EMULATION_PORT = 8081
 GPGL_PORT = 8082
-SIMPLIFIER_PATH = '/svg-simplifier/build/svg_converter'
+CONVERTER_PATH = '/svg-converter/build/svg_converter'
 
 # List of non error websocket closing codes
 OK_WS_CLOSE_CODES = {
@@ -59,7 +59,7 @@ def convert_svg(svg_bytes, logger):
     with tempfile.NamedTemporaryFile() as f:
         f.write(svg_bytes)
         f.flush()
-        proc = subprocess.run([SIMPLIFIER_PATH, f.name],
+        proc = subprocess.run([CONVERTER_PATH, f.name],
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if proc.stderr:
             logger.warn("Errors from converter: {}".format(

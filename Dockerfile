@@ -14,8 +14,8 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install yarn
 
-ADD svg-simplifier /svg-simplifier
-RUN cd /svg-simplifier && \
+ADD svg-converter /svg-converter
+RUN cd /svg-converter && \
     mkdir build && \
     cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
